@@ -1,0 +1,44 @@
+{
+  "appId": "com.khmerzoon.app",
+  "productName": "KHMERZOON",
+  "copyright": "Copyright © 2024 KHMERZOON",
+  "directories": {
+    "output": "dist-electron",
+    "buildResources": "public"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "public/icon-*.png"
+  ],
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64", "ia32"]
+      }
+    ],
+    "icon": "public/icon-512x512.png",
+    "artifactName": "${productName}-Setup-${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "KHMERZOON",
+    "installerIcon": "public/icon-512x512.png",
+    "uninstallerIcon": "public/icon-512x512.png",
+    "installerHeaderIcon": "public/icon-512x512.png"
+  },
+  "mac": {
+    "target": ["dmg"],
+    "icon": "public/icon-512x512.png",
+    "category": "public.app-category.entertainment"
+  },
+  "linux": {
+    "target": ["AppImage"],
+    "icon": "public/icon-512x512.png",
+    "category": "Video"
+  }
+}

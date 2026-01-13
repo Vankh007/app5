@@ -1,0 +1,19 @@
+project_id = "eoidzprqsvimgtwegowv"
+
+[functions.update-upcoming-status]
+verify_jwt = false
+
+[functions.send-release-notification]
+verify_jwt = false
+
+[functions.anime-api]
+verify_jwt = false
+
+[functions.upload-to-idrive]
+verify_jwt = false
+
+[functions.proxy-tmdb-image]
+verify_jwt = false
+
+[functions.cache-tmdb-images]
+verify_jwt = false

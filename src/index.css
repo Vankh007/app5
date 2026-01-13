@@ -1,0 +1,601 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
+
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
+
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%;
+
+    --accent: 0 0% 96.1%;
+    --accent-foreground: 0 0% 9%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 0 72% 51%;
+    
+    --watching: 48 96% 53%;
+    
+    /* Extended custom colors (admin configurable) */
+    --button: 0 72% 51%;
+    --button-foreground: 0 0% 98%;
+    --ribbon: 30 100% 50%;
+    --heading: 0 0% 3.9%;
+    --link: 195 100% 42%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 0 72% 51%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 0 72% 51%;
+    
+    /* Admin Dashboard Colors */
+    --admin-sidebar: 220 13% 8%;
+    --admin-sidebar-foreground: 0 0% 98%;
+    --admin-card: 0 0% 100%;
+    --admin-card-hover: 0 0% 98%;
+    --admin-stat-positive: 142 76% 36%;
+    --admin-stat-negative: 0 84% 60%;
+  }
+
+  .dark {
+    --background: 220 13% 8%;
+    --foreground: 0 0% 98%;
+
+    --card: 220 13% 12%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 220 13% 12%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 0 72% 51%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 220 13% 18%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 220 13% 18%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 220 13% 18%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 220 13% 18%;
+    --input: 220 13% 18%;
+    --ring: 0 72% 51%;
+    
+    --watching: 48 96% 53%;
+    
+    /* Extended custom colors (admin configurable) */
+    --button: 0 72% 51%;
+    --button-foreground: 0 0% 98%;
+    --ribbon: 30 100% 50%;
+    --heading: 0 0% 98%;
+    --link: 195 100% 42%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    
+    /* Admin Dashboard Colors */
+    --admin-sidebar: 220 13% 8%;
+    --admin-sidebar-foreground: 0 0% 98%;
+    --admin-card: 220 13% 12%;
+    --admin-card-hover: 220 13% 14%;
+    --admin-stat-positive: 142 76% 36%;
+    --admin-stat-negative: 0 84% 60%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* Smooth theme transition */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    overflow-x: hidden;
+    /* Smooth theme transition for body and all colors */
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Smooth color transitions when theme changes */
+  *, *::before, *::after {
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Smooth transitions for all interactive elements */
+  button, a, [role="button"] {
+    transition: all 0.2s ease-in-out;
+  }
+
+  /* Custom scrollbar for non-hidden scrollbars - Modern streaming platform style */
+  
+  /* Webkit browsers (Chrome, Safari, Edge) */
+  ::-webkit-scrollbar {
+    width: 3px;
+    height: 3px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(60, 60, 60, 0.5); /* Dark gray */
+    border-radius: 10px;
+    transition: background 0.3s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(60, 60, 60, 0.8); /* Darker gray on hover */
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(60, 60, 60, 0.5) transparent;
+  }
+
+  /* Dark mode adjustments */
+  .dark ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .dark * {
+    scrollbar-color: rgba(60, 60, 60, 0.5) transparent;
+  }
+
+  /* Hide scrollbar on mobile and tablet screens (iPad/Tablet) */
+  @media (max-width: 1024px) {
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* PWA Install Prompt Animation */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.3s ease-out;
+  }
+
+  /* PWA Standalone Mode - Native App Experience */
+  .standalone-mode {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+    overscroll-behavior: none;
+    overflow-x: hidden;
+  }
+
+  /* Disable pull-to-refresh in standalone mode */
+  @media (display-mode: standalone) {
+    body {
+      overscroll-behavior-y: contain;
+      overflow-x: hidden;
+      height: 100vh;
+    }
+    
+    html {
+      height: 100vh;
+      overflow-x: hidden;
+    }
+  }
+
+  /* iPad safe area - keep content below status bar */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    .ipad-safe-area-top {
+      padding-top: env(safe-area-inset-top, 0);
+    }
+  }
+
+  /* Video player: no extra padding/margin, let WatchPage handle safe area */
+  .video-player-wrapper {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* iPad landscape: video player directly below status bar with 0 padding */
+  @media screen and (min-width: 768px) and (orientation: landscape) {
+    .ipad-landscape-video {
+      padding: 0 !important;
+      margin: 0 !important;
+    }
+  }
+
+  /* Fullscreen video: fill entire screen, center content, hide status bar area */
+  .ipad-video-fullscreen-container {
+    padding: 0 !important;
+    margin: 0 !important;
+    /* Override safe area in fullscreen - video should fill entire screen */
+    padding-top: 0 !important;
+    top: 0 !important;
+  }
+  
+  /* When in fullscreen, hide status bar overlay area */
+  body.ipad-video-fullscreen-active {
+    /* Ensure content goes edge-to-edge in fullscreen */
+    --safe-area-inset-top: 0px;
+  }
+  
+  body.ipad-video-fullscreen-active .ipad-video-fullscreen-container {
+    /* Video container fills entire viewport in fullscreen */
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+
+  /* PWA Portrait Lock Styles for Mobile */
+  @media (display-mode: standalone) {
+    /* Mobile phones only - lock to portrait */
+    @media screen and (max-width: 767px) {
+      html.portrait-locked {
+        overflow: hidden;
+      }
+    }
+  }
+
+  /* Windows PWA specific styles */
+  @media (display-mode: window-controls-overlay) {
+    body {
+      padding-top: env(titlebar-area-height, 0);
+    }
+  }
+
+  /* Content protection for videos */
+  video {
+    -webkit-user-select: none;
+    user-select: none;
+    pointer-events: auto;
+  }
+
+  /* Prevent text selection on protected content */
+  .content-protected {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+
+  /* Native app safe area support for transparent status bar */
+  .native-safe-area-top {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  .native-safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  
+  /* Full safe area wrapper for native apps */
+  .native-app-container {
+    padding-top: env(safe-area-inset-top, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+  }
+
+  /* ============================================
+     NATIVE ANDROID/IOS APP SPECIFIC STYLES
+     ============================================ */
+  
+  /* Body styles for native app */
+  body.native-app {
+    /* Prevent overscroll/bounce effect */
+    overscroll-behavior: none;
+    overscroll-behavior-y: none;
+    
+    /* Prevent pull-to-refresh on native (handled by custom component) */
+    touch-action: pan-x pan-y;
+    
+    /* Smoother scrolling */
+    -webkit-overflow-scrolling: touch;
+    
+    /* Prevent text selection by default */
+    -webkit-user-select: none;
+    user-select: none;
+    
+    /* Prevent callout on long-press */
+    -webkit-touch-callout: none;
+  }
+
+  /* Allow text selection in inputs and textareas */
+  body.native-app input,
+  body.native-app textarea,
+  body.native-app [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+
+  /* Android-specific styles */
+  body.native-android {
+    /* Hide scrollbars on Android */
+    scrollbar-width: none;
+  }
+  
+  body.native-android::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  body.native-android * {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  body.native-android *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  /* iOS-specific styles */
+  body.native-ios {
+    /* Prevent iOS rubber-band scrolling */
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  body.native-ios #root {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Native app header with proper safe area */
+  .native-app-header {
+    padding-top: calc(env(safe-area-inset-top, 0px) + 0.5rem);
+  }
+
+  /* Native app bottom nav with safe area */
+  .native-app-bottom-nav {
+    padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 0.25rem);
+  }
+
+  /* Native app fullscreen video - hide all system UI areas */
+  .native-fullscreen {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* Haptic feedback visual indicator */
+  .native-app .touch-feedback {
+    transition: transform 0.1s ease-out, opacity 0.1s ease-out;
+  }
+  
+  .native-app .touch-feedback:active {
+    transform: scale(0.97);
+    opacity: 0.8;
+  }
+
+  /* Native app card press effect */
+  .native-app .native-card-press {
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  }
+  
+  .native-app .native-card-press:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  /* Native app button press effect */
+  .native-app button:not(.no-press-effect):active,
+  .native-app [role="button"]:not(.no-press-effect):active {
+    transform: scale(0.97);
+  }
+
+  /* Smooth page transitions for native feel */
+  .native-app main {
+    animation: nativeFadeIn 0.2s ease-out;
+  }
+
+  @keyframes nativeFadeIn {
+    from {
+      opacity: 0.9;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Video player native optimizations */
+  .native-app video {
+    /* Hardware acceleration */
+    transform: translateZ(0);
+    will-change: transform;
+    
+    /* Prevent context menu */
+    -webkit-touch-callout: none;
+  }
+
+  /* Native image optimizations */
+  .native-app img {
+    /* Hardware acceleration for smoother scrolling */
+    transform: translateZ(0);
+    
+    /* Prevent drag on images */
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+
+  /* Pull to refresh indicator styles */
+  .native-app .ptr-indicator {
+    will-change: transform;
+    transform: translateZ(0);
+  }
+}
+
+/* Android Native Video Player Wrapper - NO padding for status bar in portrait (video starts at top) */
+.native-android-player-wrapper {
+  padding-top: 0 !important;
+  padding-left: 0;
+  padding-right: 0;
+  background-color: black !important;
+}
+
+/* Ensure the wrapper maintains proper layout */
+.native-android-player-wrapper .video-player-container {
+  width: 100%;
+}
+
+/* Native app landscape mode - video fills entire screen, NO padding */
+@media screen and (orientation: landscape) {
+  .native-android-player-wrapper {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  .watch-page-portrait-safe {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Landscape - constrain video container to viewport */
+  .video-player-container {
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+  }
+  
+  /* Landscape video element - contain within bounds */
+  .video-player-container video,
+  .video-player-safe-area video {
+    object-fit: contain !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+  }
+}
+
+/* iPad/Tablet specific - ensure video doesn't overflow screen in landscape */
+@media screen and (min-width: 768px) and (orientation: landscape) {
+  .native-android-player-wrapper,
+  .watch-page-portrait-safe {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* iPad/Tablet video sizing - fit within screen bounds */
+  .video-player-container video,
+  .video-player-safe-area video {
+    object-fit: contain !important;
+    max-height: 100vh !important;
+    max-height: 100dvh !important;
+    max-width: 100vw !important;
+    max-width: 100dvw !important;
+  }
+}
+
+/* ============================================
+   APP-WIDE IMMERSIVE MODE STYLES
+   Navigation bar hidden, content fills entire screen
+   ============================================ */
+
+/* App content fills entire screen (edge-to-edge) */
+body.native-app-immersive {
+  /* Content draws behind status bar */
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+}
+
+/* Watch page in portrait: player starts from top edge (no extra padding) */
+.watch-page-portrait-safe {
+  padding-top: 0 !important;
+  margin-top: 0 !important;
+  background-color: black !important;
+}
+
+/* Watch page in landscape: no padding at all, video fills screen */
+@media screen and (orientation: landscape) {
+  .watch-page-portrait-safe {
+    padding: 0 !important;
+    margin: 0 !important;
+    background-color: black !important;
+  }
+}
+
+/* Watch page in landscape fullscreen: no padding at all */
+.watch-page-fullscreen {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* Native app - hide all system UI during video fullscreen */
+body.native-video-fullscreen {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+body.native-video-fullscreen .watch-page-portrait-safe {
+  padding-top: 0 !important;
+}
