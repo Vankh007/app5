@@ -497,15 +497,19 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
     const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
     if (!isAndroidNative) return;
 
-    const sub = App.addListener('backButton', () => {
+    let listenerHandle: { remove: () => void } | undefined;
+
+    App.addListener('backButton', () => {
       if (isFullscreenRef.current) {
         // Exit fullscreen and return to portrait
         toggleFullscreen();
       }
+    }).then((handle) => {
+      listenerHandle = handle;
     });
 
     return () => {
-      sub.remove();
+      listenerHandle?.remove();
     };
   }, [toggleFullscreen]);
 
