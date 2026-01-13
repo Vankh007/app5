@@ -80,14 +80,7 @@ const normalizeType = (rawType?: string, url?: string): "mp4" | "hls" | "dash" |
 
 // Convert VK Video URL to embed format
 // IMPORTANT: VK requires a hash parameter for embedding "Anyone with the link" videos
-// To get the proper embed URL:
-// 1. Go to the video on VK → Click "Share" → "Embed" → Copy the iframe src
-// 2. Or use format: https://vk.com/video_ext.php?oid=-234949707&id=456239098&hash=XXXX
-// 
-// Supports formats:
-// - https://vk.com/video_ext.php?oid=-123&id=456&hash=abc (embed URL - RECOMMENDED)
-// - https://vk.com/video-123_456?hash=abc (URL with hash parameter)
-// - https://vkvideo.ru/video-123_456 (will work only for public videos without hash requirement)
+// This function handles basic conversion. For full API support, use fetchVkEmbedUrl()
 const convertVkVideoUrl = (url: string): string => {
   if (!url) return url;
   
@@ -115,12 +108,11 @@ const convertVkVideoUrl = (url: string): string => {
     const hashMatch = url.match(/[?&]hash=([a-f0-9]+)/i);
     const hash = hashMatch ? `&hash=${hashMatch[1]}` : '';
     
-    // Log warning if no hash found - video might not load
-    if (!hash) {
-      console.warn('VK Video: No hash parameter found. For "Anyone with the link" videos, use the embed URL from VK\'s share menu instead.');
-    }
+    // Also check for access_key in URL format: video-123_456_accesskey
+    const accessKeyMatch = url.match(/video-?\d+_\d+_([a-f0-9]+)/i);
+    const accessKey = accessKeyMatch && !hash ? `&hash=${accessKeyMatch[1]}` : hash;
     
-    return `https://vk.com/video_ext.php?oid=${oid}&id=${id}${hash}&hd=2&autoplay=0`;
+    return `https://vk.com/video_ext.php?oid=${oid}&id=${id}${accessKey}&hd=2&autoplay=0`;
   }
   
   // Check for vk.com/video?z=video-123_456 format
@@ -134,6 +126,37 @@ const convertVkVideoUrl = (url: string): string => {
   }
   
   return url;
+};
+
+// Fetch VK embed URL using the API (for "Anyone with the link" videos)
+const fetchVkEmbedUrl = async (url: string): Promise<string> => {
+  try {
+    // Check if it's a VK video URL
+    const isVkUrl = /(?:vk\.com|vk\.ru|vkvideo\.ru)\/video/i.test(url);
+    if (!isVkUrl) return convertVkVideoUrl(url);
+    
+    console.log('Fetching VK embed URL via API for:', url);
+    
+    const { data, error } = await supabase.functions.invoke('vk-video-api', {
+      body: { videoUrl: url }
+    });
+    
+    if (error) {
+      console.error('VK API error:', error);
+      return convertVkVideoUrl(url);
+    }
+    
+    if (data?.success && data?.embedUrl) {
+      console.log('VK API returned embed URL:', data.embedUrl);
+      return data.embedUrl;
+    }
+    
+    console.warn('VK API did not return embed URL, using fallback');
+    return convertVkVideoUrl(url);
+  } catch (error) {
+    console.error('Error fetching VK embed URL:', error);
+    return convertVkVideoUrl(url);
+  }
 };
 
 const getMp4Url = (mp4Urls: Record<string, string>, quality: string) => {
@@ -251,6 +274,8 @@ const VideoPlayer = ({
   const [currentQuality, setCurrentQuality] = useState("720p");
   const [availableQualities, setAvailableQualities] = useState<string[]>([]);
   const [currentServer, setCurrentServer] = useState<VideoSource | null>(null);
+  const [resolvedVkEmbedUrl, setResolvedVkEmbedUrl] = useState<string | null>(null);
+  const [isResolvingVkUrl, setIsResolvingVkUrl] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [showControls, setShowControls] = useState(true);
   const [showCenterIcon, setShowCenterIcon] = useState(false);
@@ -692,7 +717,41 @@ const VideoPlayer = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [displayedSources, currentEpisodeId, accessType, accessLoading, hasAccess]);
 
-  // Cleanup Shaka player only (not the video element)
+  // Resolve VK video URLs using the API for "Anyone with the link" videos
+  useEffect(() => {
+    const resolveVkUrl = async () => {
+      if (!currentServer?.url) {
+        setResolvedVkEmbedUrl(null);
+        return;
+      }
+
+      const sourceType = normalizeType(currentServer.source_type, currentServer.url);
+      const isVkVideo = /(?:vk\.com|vk\.ru|vkvideo\.ru)\/video/i.test(currentServer.url);
+      
+      // Only resolve VK video URLs that are iframe type
+      if ((sourceType === 'iframe' || sourceType === 'embed') && isVkVideo) {
+        console.log('Resolving VK video URL:', currentServer.url);
+        setIsResolvingVkUrl(true);
+        
+        try {
+          const embedUrl = await fetchVkEmbedUrl(currentServer.url);
+          console.log('Resolved VK embed URL:', embedUrl);
+          setResolvedVkEmbedUrl(embedUrl);
+        } catch (error) {
+          console.error('Failed to resolve VK URL:', error);
+          // Fall back to basic conversion
+          setResolvedVkEmbedUrl(convertVkVideoUrl(currentServer.url));
+        } finally {
+          setIsResolvingVkUrl(false);
+        }
+      } else {
+        setResolvedVkEmbedUrl(null);
+      }
+    };
+
+    resolveVkUrl();
+  }, [currentServer?.url, currentServer?.source_type]);
+
   const cleanupShakaPlayer = async () => {
     if (shakaPlayerRef.current) {
       try {
@@ -1914,17 +1973,26 @@ const VideoPlayer = ({
       )}
 
       {/* Iframe Element - Only load when user has access and server is not restricted */}
-      {/* Supports VK Video URLs with automatic conversion to embed format */}
+      {/* Supports VK Video URLs with automatic API-based resolution for "Anyone with the link" videos */}
       {(sourceType === "embed" || sourceType === "iframe") && !isLocked && !accessLoading && !allSourcesMobileOnly && !allSourcesWebOnly && !isCurrentServerRestricted && (
         <>
-          <iframe
-            ref={iframeRef}
-            src={convertVkVideoUrl(currentServer.url)}
-            className="w-full h-full"
-            allowFullScreen
-            allow="autoplay; encrypted-media; fullscreen"
-            style={{ border: 'none' }}
-          />
+          {isResolvingVkUrl ? (
+            <div className="w-full h-full flex items-center justify-center bg-black">
+              <div className="flex flex-col items-center gap-2">
+                <Loader2 className="h-8 w-8 text-white animate-spin" />
+                <span className="text-white/70 text-sm">Loading video...</span>
+              </div>
+            </div>
+          ) : (
+            <iframe
+              ref={iframeRef}
+              src={resolvedVkEmbedUrl || convertVkVideoUrl(currentServer.url)}
+              className="w-full h-full"
+              allowFullScreen
+              allow="autoplay; encrypted-media; fullscreen"
+              style={{ border: 'none' }}
+            />
+          )}
         </>
       )}
       
