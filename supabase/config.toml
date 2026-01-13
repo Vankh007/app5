@@ -1,1 +1,4 @@
 project_id = "eoidzprqsvimgtwegowv"
+
+[functions.vk-video-api]
+verify_jwt = false
