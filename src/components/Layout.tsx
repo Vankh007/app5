@@ -127,8 +127,16 @@ const Layout = ({ children }: LayoutProps) => {
 
   // Mobile, Tablet, and Native App Layout - unified experience
   if (isMobile || isTablet || isNative) {
+    const isHome = location.pathname === '/';
+
+    // Native app: allow content to render behind the transparent status bar on Home.
+    // Other routes keep safe-area padding to avoid unexpected overlaps.
+    const topInsetClass = isNative
+      ? (isHome ? '' : 'native-safe-area-top')
+      : 'pt-[env(safe-area-inset-top)]';
+
     return (
-      <div className={`min-h-screen bg-background dark:bg-black ${isNative ? 'native-safe-area-top' : 'pt-[env(safe-area-inset-top)]'}`}>
+      <div className={`min-h-screen bg-background dark:bg-black ${topInsetClass}`.trim()}>
         <MobileHeader onMenuClick={() => setMobileSidebarOpen(true)} />
         <MobileSidebar isOpen={mobileSidebarOpen} onClose={() => setMobileSidebarOpen(false)} />
         

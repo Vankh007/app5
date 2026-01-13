@@ -2069,20 +2069,15 @@ const VideoPlayer = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={(e) => {
+                onPointerUp={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   toggleFullscreen();
                 }}
-                onTouchEnd={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setTimeout(() => toggleFullscreen(), 0);
-                }}
                 className="h-10 w-10 sm:h-11 sm:w-11 text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full border border-white/20 transition-all active:scale-95"
-                style={{ 
+                style={{
                   WebkitTapHighlightColor: 'transparent',
-                  touchAction: 'manipulation'
+                  touchAction: 'manipulation',
                 }}
               >
                 <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -2208,35 +2203,24 @@ const VideoPlayer = ({
                     <PictureInPicture className="h-5 w-5" />
                   </Button>
 
-                  {/* Fullscreen Toggle Button - Enhanced for iPad PWA */}
+                  {/* Fullscreen Toggle Button - Android native friendly (pointer events) */}
                   <Button 
                     variant="ghost" 
                     size="icon"
-                    disabled={isFullscreenTransitioning}
-                    onClick={(e) => {
+                    // On Android native, the first tap can be consumed by the system UI when immersive mode isn't sticky.
+                    // Don't disable the button there; just ignore rapid toggles inside the hook.
+                    disabled={isFullscreenTransitioning && !isAndroidNative}
+                    onPointerUp={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      // Avoid double-triggering from both click and touchend
-                      if (!(e.nativeEvent as any).fromTouch) {
-                        toggleFullscreen();
-                      }
-                    }}
-                    onTouchStart={(e) => {
-                      // Mark this as a touch event to prevent click from also firing
-                      (e.nativeEvent as any).fromTouch = true;
-                    }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      // Use setTimeout to ensure touch is processed properly on iPad
-                      setTimeout(() => toggleFullscreen(), 0);
+                      toggleFullscreen();
                     }}
                     className={`h-8 w-8 sm:h-9 sm:w-9 text-white hover:bg-white/10 active:bg-white/20 touch-manipulation select-none ${
-                      isFullscreenTransitioning ? 'opacity-50 cursor-wait' : ''
+                      isFullscreenTransitioning && !isAndroidNative ? 'opacity-50 cursor-wait' : ''
                     }`}
-                    style={{ 
+                    style={{
                       WebkitTapHighlightColor: 'transparent',
-                      touchAction: 'manipulation'
+                      touchAction: 'manipulation',
                     }}
                   >
                     {isFullscreen ? <Minimize className="h-5 w-5 sm:h-5 sm:w-5" /> : <Maximize className="h-5 w-5 sm:h-5 sm:w-5" />}

@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, RefObject } from 'react';
 import { Capacitor } from '@capacitor/core';
+import { App } from '@capacitor/app';
 import { hideStatusBar, showStatusBar } from './useNativeStatusBar';
 import { setGlobalFullscreenState } from './useFullscreenState';
 import { lockToLandscape, lockToPortrait } from './useScreenOrientation';
@@ -452,16 +453,28 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
   // Periodically re-enforce immersive mode on Android when in fullscreen
   // This handles edge cases where system UI briefly appears (e.g., after touch events)
   useEffect(() => {
-    if (!isFullscreen || !Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+    const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+    if (!isFullscreen || !isAndroidNative) {
       return;
     }
 
-    // Enforce immersive mode every 2 seconds while in fullscreen
+    // Enforce immersive mode every 1s while in fullscreen
     const enforceInterval = setInterval(() => {
       if (isFullscreenRef.current) {
         hideStatusBar();
       }
-    }, 2000);
+    }, 1000);
+
+    // Also enforce on any touch/pointer interaction (first tap often reveals system bars)
+    const el = containerRef.current;
+    const handleAnyInteraction = () => {
+      if (isFullscreenRef.current) {
+        hideStatusBar();
+      }
+    };
+
+    el?.addEventListener('pointerdown', handleAnyInteraction, { capture: true });
+    el?.addEventListener('touchstart', handleAnyInteraction, { capture: true, passive: true } as any);
 
     // Also enforce on visibility change (when app comes back to foreground)
     const handleVisibilityChange = () => {
@@ -473,9 +486,28 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
 
     return () => {
       clearInterval(enforceInterval);
+      el?.removeEventListener('pointerdown', handleAnyInteraction, { capture: true } as any);
+      el?.removeEventListener('touchstart', handleAnyInteraction, { capture: true } as any);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isFullscreen]);
+  }, [isFullscreen, containerRef]);
+
+  // Android hardware back button: exit fullscreen instead of leaving the page
+  useEffect(() => {
+    const isAndroidNative = Capacitor.isNativePlatform() && Capacitor.getPlatform() === 'android';
+    if (!isAndroidNative) return;
+
+    const sub = App.addListener('backButton', () => {
+      if (isFullscreenRef.current) {
+        // Exit fullscreen and return to portrait
+        toggleFullscreen();
+      }
+    });
+
+    return () => {
+      sub.remove();
+    };
+  }, [toggleFullscreen]);
 
   // Cleanup on unmount
   useEffect(() => {
