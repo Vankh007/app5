@@ -2069,18 +2069,18 @@ const VideoPlayer = ({
               <Button
                 variant="ghost"
                 size="icon"
-                onPointerUp={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  toggleFullscreen();
-                }}
                 onClick={(e) => {
                   e.preventDefault();
                   e.stopPropagation();
                   toggleFullscreen();
                 }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTimeout(() => toggleFullscreen(), 0);
+                }}
                 className="h-10 w-10 sm:h-11 sm:w-11 text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full border border-white/20 transition-all active:scale-95"
-                style={{
+                style={{ 
                   WebkitTapHighlightColor: 'transparent',
                   touchAction: 'manipulation'
                 }}
@@ -2213,15 +2213,23 @@ const VideoPlayer = ({
                     variant="ghost" 
                     size="icon"
                     disabled={isFullscreenTransitioning}
-                    onPointerUp={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      toggleFullscreen();
-                    }}
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      toggleFullscreen();
+                      // Avoid double-triggering from both click and touchend
+                      if (!(e.nativeEvent as any).fromTouch) {
+                        toggleFullscreen();
+                      }
+                    }}
+                    onTouchStart={(e) => {
+                      // Mark this as a touch event to prevent click from also firing
+                      (e.nativeEvent as any).fromTouch = true;
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      // Use setTimeout to ensure touch is processed properly on iPad
+                      setTimeout(() => toggleFullscreen(), 0);
                     }}
                     className={`h-8 w-8 sm:h-9 sm:w-9 text-white hover:bg-white/10 active:bg-white/20 touch-manipulation select-none ${
                       isFullscreenTransitioning ? 'opacity-50 cursor-wait' : ''

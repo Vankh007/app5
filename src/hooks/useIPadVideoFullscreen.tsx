@@ -1,8 +1,9 @@
 import { useState, useCallback, useRef, useEffect, RefObject } from 'react';
 import { Capacitor } from '@capacitor/core';
-import { hideStatusBar, showStatusBar, enterImmersiveFullscreen, exitImmersiveFullscreen } from './useNativeStatusBar';
+import { hideStatusBar, showStatusBar } from './useNativeStatusBar';
 import { setGlobalFullscreenState } from './useFullscreenState';
 import { lockToLandscape, lockToPortrait } from './useScreenOrientation';
+import { enterVideoFullscreen, exitVideoFullscreen } from './useImmersiveMode';
 
 interface UseIPadVideoFullscreenOptions {
   containerRef: RefObject<HTMLDivElement>;
@@ -300,20 +301,24 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
         // to reliably hide the *system* navigation bar. We also keep the existing CSS fullscreen
         // styles to hide app UI layers (header/bottom nav).
         if (isNative) {
-          console.log('[iPadFS] Native fullscreen entry (CSS + immersive + orientation)');
+          console.log('[iPadFS] Native fullscreen entry (fullscreen API + CSS)');
 
-          // Use CSS-based fullscreen for native to avoid Web Fullscreen API restrictions in Android WebView
-          // (and to keep controls reliable). Then apply true immersive mode to hide system UI.
-          applyPWAFullscreenStyles(true);
+          await enterVideoFullscreen(container, async () => {
+            await lockToLandscape();
+          });
 
+          // Some OEM Android builds apply the orientation *after* the fullscreen transition.
+          // Do a second lock attempt to make landscape fullscreen much more reliable.
+          await new Promise(resolve => setTimeout(resolve, 150));
           await lockToLandscape();
-          await new Promise(resolve => setTimeout(resolve, 120));
-
-          await enterImmersiveFullscreen();
-          await new Promise(resolve => setTimeout(resolve, 80));
-
-          // Re-enforce (OEM devices sometimes show icons after rotation/touch)
+          
+          // Re-apply immersive mode after orientation is stable (critical for hiding notification icons)
           await hideStatusBar();
+          await new Promise(resolve => setTimeout(resolve, 50));
+          await hideStatusBar();
+
+          // Hide app UI chrome (BottomNav/Header) even if the device still shows system bars.
+          applyPWAFullscreenStyles(true);
 
           setIsFullscreen(true);
           await restorePlaybackState();
@@ -371,16 +376,14 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
 
         // Native app: exit using proper sequencing + exit fullscreen API
         if (isNative) {
-          console.log('[iPadFS] Native fullscreen exit (CSS + immersive + orientation)');
+          console.log('[iPadFS] Native fullscreen exit (fullscreen API + CSS)');
 
-          // Exit true immersive mode first, then restore portrait, then remove CSS fullscreen.
-          await exitImmersiveFullscreen();
-          await new Promise(resolve => setTimeout(resolve, 80));
-
-          await lockToPortrait();
-          await new Promise(resolve => setTimeout(resolve, 80));
-
+          // Remove app UI hiding first, then exit fullscreen and restore portrait.
           applyPWAFullscreenStyles(false);
+
+          await exitVideoFullscreen(async () => {
+            await lockToPortrait();
+          });
 
           setIsFullscreen(false);
           await restorePlaybackState();
