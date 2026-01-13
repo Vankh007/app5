@@ -105,39 +105,38 @@ export async function enterImmersiveFullscreen(): Promise<void> {
     if (Capacitor.getPlatform() === 'android') {
       const Fullscreen = await loadFullscreenPlugin();
       if (Fullscreen) {
-        // The plugin doesn't return proper promises - wrap in try/catch and don't await
         try {
-          // First deactivate to ensure clean state
-          Fullscreen.deactivateImmersiveMode();
+          // Clean state first
+          await Fullscreen.deactivateImmersiveMode();
           await new Promise(resolve => setTimeout(resolve, 50));
-          
-          // Then activate immersive mode - this should hide ALL system bars
-          Fullscreen.activateImmersiveMode();
+
+          await Fullscreen.activateImmersiveMode();
           console.log('[StatusBar] Entered immersive mode via fullscreen plugin');
         } catch (e) {
           console.log('[StatusBar] Fullscreen plugin call failed:', e);
         }
-        // Longer delay to let native side fully process
+
+        // Let native side fully apply the flags (important on OEM builds)
         await new Promise(resolve => setTimeout(resolve, 150));
-        
-        // Double-tap the immersive mode to ensure it sticks on stubborn devices
+
+        // Re-apply once more to make it stick (common OEM quirk)
         try {
-          Fullscreen.activateImmersiveMode();
-        } catch (e) {
-          // Ignore
+          await Fullscreen.activateImmersiveMode();
+        } catch {
+          // ignore
         }
         await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
 
-    // Also hide status bar for true fullscreen
+    // Also hide the Capacitor status bar for true fullscreen
     await StatusBar.hide();
-    
-    // On Android, set overlay mode to ensure content fills behind status bar area
+
+    // On Android, keep overlay so content can render edge-to-edge
     if (Capacitor.getPlatform() === 'android') {
       await StatusBar.setOverlaysWebView({ overlay: true });
     }
-    
+
     console.log('[StatusBar] Entered immersive mode - status bar hidden');
   } catch (error) {
     console.log('[StatusBar] Failed to enter immersive mode:', error);
@@ -186,21 +185,22 @@ export async function hideStatusBar(): Promise<void> {
   if (!isNative()) return;
 
   try {
-    // On Android, prefer true immersive mode to also hide navigation bar
+    // On Android, prefer true immersive mode (hides status + nav bars)
     if (Capacitor.getPlatform() === 'android') {
       const Fullscreen = await loadFullscreenPlugin();
       if (Fullscreen) {
         try {
-          Fullscreen.activateImmersiveMode();
+          await Fullscreen.activateImmersiveMode();
           console.log('[StatusBar] Activated immersive mode (hides all system bars)');
         } catch (e) {
           console.log('[StatusBar] Immersive mode call failed:', e);
         }
+        // Give the native UI thread time to apply flags
         await new Promise(resolve => setTimeout(resolve, 100));
-        return;
       }
     }
 
+    // Always also hide the Capacitor status bar (some OEM WebViews still show icons otherwise)
     await StatusBar.hide();
     console.log('[StatusBar] Status bar hidden');
   } catch (error) {
@@ -220,17 +220,18 @@ export async function showStatusBar(): Promise<void> {
       const Fullscreen = await loadFullscreenPlugin();
       if (Fullscreen) {
         try {
-          Fullscreen.deactivateImmersiveMode();
+          await Fullscreen.deactivateImmersiveMode();
           console.log('[StatusBar] Deactivated immersive mode (shows all system bars)');
         } catch (e) {
           console.log('[StatusBar] Deactivate immersive call failed:', e);
         }
         await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Restore edge-to-edge transparent status bar
-        await initEdgeToEdge();
-        return;
       }
+
+      // Restore edge-to-edge transparent status bar + ensure it is visible
+      await initEdgeToEdge();
+      await StatusBar.show();
+      return;
     }
 
     await StatusBar.show();
