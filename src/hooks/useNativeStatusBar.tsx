@@ -107,18 +107,37 @@ export async function enterImmersiveFullscreen(): Promise<void> {
       if (Fullscreen) {
         // The plugin doesn't return proper promises - wrap in try/catch and don't await
         try {
+          // First deactivate to ensure clean state
+          Fullscreen.deactivateImmersiveMode();
+          await new Promise(resolve => setTimeout(resolve, 50));
+          
+          // Then activate immersive mode - this should hide ALL system bars
           Fullscreen.activateImmersiveMode();
           console.log('[StatusBar] Entered immersive mode via fullscreen plugin');
         } catch (e) {
           console.log('[StatusBar] Fullscreen plugin call failed:', e);
         }
-        // Small delay to let native side process
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Longer delay to let native side fully process
+        await new Promise(resolve => setTimeout(resolve, 150));
+        
+        // Double-tap the immersive mode to ensure it sticks on stubborn devices
+        try {
+          Fullscreen.activateImmersiveMode();
+        } catch (e) {
+          // Ignore
+        }
+        await new Promise(resolve => setTimeout(resolve, 50));
       }
     }
 
     // Also hide status bar for true fullscreen
     await StatusBar.hide();
+    
+    // On Android, set overlay mode to ensure content fills behind status bar area
+    if (Capacitor.getPlatform() === 'android') {
+      await StatusBar.setOverlaysWebView({ overlay: true });
+    }
+    
     console.log('[StatusBar] Entered immersive mode - status bar hidden');
   } catch (error) {
     console.log('[StatusBar] Failed to enter immersive mode:', error);

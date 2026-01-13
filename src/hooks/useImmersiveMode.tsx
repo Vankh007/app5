@@ -113,13 +113,17 @@ export async function enterVideoFullscreen(
     if (onOrientationLocked) {
       await onOrientationLocked();
       // Wait for orientation to fully settle
-      await new Promise(resolve => setTimeout(resolve, 150));
+      await new Promise(resolve => setTimeout(resolve, 200));
     }
     
     // STEP 2: Enter FULL immersive mode (hide BOTH status bar AND nav bar)
     await enterImmersiveFullscreen();
     
-    // STEP 3: Small delay before fullscreen request
+    // STEP 3: Longer delay before fullscreen request to ensure immersive mode is active
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // STEP 3.5: Re-apply immersive mode (some devices need this after orientation change)
+    await enterImmersiveFullscreen();
     await new Promise(resolve => setTimeout(resolve, 50));
   }
   
@@ -138,9 +142,18 @@ export async function enterVideoFullscreen(
       await (container as any).webkitRequestFullscreen();
     } else if ((container as any).mozRequestFullScreen) {
       await (container as any).mozRequestFullScreen();
+    } else if ((container as any).msRequestFullScreen) {
+      await (container as any).mozRequestFullScreen();
     } else if ((container as any).msRequestFullscreen) {
       await (container as any).msRequestFullscreen();
     }
+    
+    // STEP 5: Re-apply immersive mode after fullscreen request (critical for hiding status bar icons)
+    if (isNative) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+      await enterImmersiveFullscreen();
+    }
+    
     console.log('[Immersive] Video fullscreen entered successfully');
   } catch (error) {
     console.error('[Immersive] Failed to enter video fullscreen:', error);
