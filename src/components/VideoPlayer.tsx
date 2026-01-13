@@ -3,7 +3,7 @@ import {
   Play, Pause, Volume2, VolumeX, Maximize, Minimize, 
   Monitor, Film, Video, Loader2, SkipBack, SkipForward, Crown,
   PictureInPicture, Server as ServerIcon,
-  CreditCard, ListVideo, ChevronLeft, ChevronRight, X
+  CreditCard, ListVideo, ChevronLeft, ChevronRight, X, ArrowLeft
 } from "lucide-react";
 import { VideoSettingsMenu } from "./VideoSettingsMenu";
 // @ts-ignore - Shaka Player types
@@ -2063,6 +2063,33 @@ const VideoPlayer = ({
       {/* Center Controls - hide when settings menu is open */}
       {sourceType !== "embed" && sourceType !== "iframe" && !allSourcesMobileOnly && !allSourcesWebOnly && !isCurrentServerRestricted && (
         <>
+          {/* Exit Fullscreen Button - Top Left Corner (only in fullscreen) */}
+          {isFullscreen && showControls && !isLocked && !settingsMenuOpen && (
+            <div className="video-controls absolute top-0 left-0 z-[60] p-3 sm:p-4 pointer-events-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  toggleFullscreen();
+                }}
+                onTouchEnd={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setTimeout(() => toggleFullscreen(), 0);
+                }}
+                className="h-10 w-10 sm:h-11 sm:w-11 text-white bg-black/50 hover:bg-black/70 backdrop-blur-sm rounded-full border border-white/20 transition-all active:scale-95"
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  touchAction: 'manipulation'
+                }}
+              >
+                <ArrowLeft className="h-5 w-5 sm:h-6 sm:w-6" />
+              </Button>
+            </div>
+          )}
+
           <div className={`video-controls absolute inset-0 z-20 flex items-center justify-center gap-12 pointer-events-none transition-opacity duration-300 ${showControls && !isLocked && !settingsMenuOpen ? 'opacity-100' : 'opacity-0'}`}>
             <Button variant="ghost" size="icon" onClick={skipBackward} className="h-12 w-12 text-white/90 hover:text-white pointer-events-auto">
               <SkipBack className="h-6 w-6" fill="currentColor" />

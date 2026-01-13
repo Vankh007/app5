@@ -309,8 +309,13 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
 
           // Some OEM Android builds apply the orientation *after* the fullscreen transition.
           // Do a second lock attempt to make landscape fullscreen much more reliable.
-          await new Promise(resolve => setTimeout(resolve, 120));
+          await new Promise(resolve => setTimeout(resolve, 150));
           await lockToLandscape();
+          
+          // Re-apply immersive mode after orientation is stable (critical for hiding notification icons)
+          await hideStatusBar();
+          await new Promise(resolve => setTimeout(resolve, 50));
+          await hideStatusBar();
 
           // Hide app UI chrome (BottomNav/Header) even if the device still shows system bars.
           applyPWAFullscreenStyles(true);
@@ -443,6 +448,34 @@ export function useIPadVideoFullscreen({ containerRef, videoRef }: UseIPadVideoF
       document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
     };
   }, [containerRef]);
+
+  // Periodically re-enforce immersive mode on Android when in fullscreen
+  // This handles edge cases where system UI briefly appears (e.g., after touch events)
+  useEffect(() => {
+    if (!isFullscreen || !Capacitor.isNativePlatform() || Capacitor.getPlatform() !== 'android') {
+      return;
+    }
+
+    // Enforce immersive mode every 2 seconds while in fullscreen
+    const enforceInterval = setInterval(() => {
+      if (isFullscreenRef.current) {
+        hideStatusBar();
+      }
+    }, 2000);
+
+    // Also enforce on visibility change (when app comes back to foreground)
+    const handleVisibilityChange = () => {
+      if (!document.hidden && isFullscreenRef.current) {
+        hideStatusBar();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      clearInterval(enforceInterval);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [isFullscreen]);
 
   // Cleanup on unmount
   useEffect(() => {
