@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { useIsMobile } from './use-mobile';
-import { useIsTablet } from './use-tablet';
 import { Capacitor } from '@capacitor/core';
 
 interface UsePullToRefreshOptions {
@@ -21,7 +20,6 @@ export const usePullToRefresh = ({
   containerRef,
 }: UsePullToRefreshOptions) => {
   const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
   const [pullDistance, setPullDistance] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const startY = useRef(0);
@@ -62,7 +60,7 @@ export const usePullToRefresh = ({
   }, []);
 
   useEffect(() => {
-    if (!isMobile && !isTablet) return;
+    if (!isMobile) return;
 
     const handleTouchStart = (e: TouchEvent) => {
       // Reset state
@@ -143,13 +141,13 @@ export const usePullToRefresh = ({
       document.removeEventListener('touchmove', handleTouchMove);
       document.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [isMobile, isTablet, pullDistance, threshold, resistance, onRefresh, isRefreshing, isAtTop, isInsideScrollableElement]);
+  }, [isMobile, pullDistance, threshold, resistance, onRefresh, isRefreshing, isAtTop, isInsideScrollableElement]);
 
   const isNative = Capacitor.isNativePlatform();
 
   return {
     pullDistance,
     isRefreshing,
-    isEnabled: isMobile || isTablet || isNative,
+    isEnabled: isMobile || isNative,
   };
 };

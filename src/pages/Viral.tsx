@@ -1,7 +1,5 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useIsTablet } from '@/hooks/use-tablet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import GridMovieCard from '@/components/GridMovieCard';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -35,8 +33,6 @@ interface Short {
 }
 
 const Viral = () => {
-  const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
   const { t } = useLanguage();
   const navigate = useNavigate();
   
@@ -109,7 +105,7 @@ const Viral = () => {
   const heroBackdrop = getHeroBackdrop();
 
   const renderLoadingSkeleton = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 gap-3">
       {Array.from({ length: 14 }).map((_, i) => (
         <div key={i} className="space-y-2">
           <Skeleton className="aspect-[2/3] w-full rounded-lg" />
@@ -121,11 +117,11 @@ const Viral = () => {
 
   // Artistic rank number component
   const RankBadge = ({ rank }: { rank: number }) => (
-    <div className="absolute -left-2 sm:-left-3 md:-left-4 bottom-0 z-10 flex items-end pointer-events-none">
+    <div className="absolute -left-2 bottom-0 z-10 flex items-end pointer-events-none">
       <span 
         className="font-black text-transparent bg-clip-text leading-none drop-shadow-2xl"
         style={{
-          fontSize: isMobile ? '3rem' : isTablet ? '4rem' : '5rem',
+          fontSize: '3rem',
           backgroundImage: 'linear-gradient(180deg, hsl(var(--primary)) 0%, hsl(var(--primary)/0.6) 50%, hsl(var(--primary)/0.3) 100%)',
           WebkitTextStroke: '2px hsl(var(--primary)/0.5)',
           textShadow: '0 4px 20px hsl(var(--primary)/0.4), 0 0 40px hsl(var(--primary)/0.2)',
@@ -137,12 +133,12 @@ const Viral = () => {
   );
 
   const renderTrendingContent = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4 md:gap-5 lg:gap-6">
+    <div className="grid grid-cols-2 gap-4">
       {trendingContent.map((content, index) => (
         <div 
           key={content.id} 
           className="relative group"
-          style={{ paddingLeft: index < 10 ? (isMobile ? '1.5rem' : '2rem') : 0 }}
+          style={{ paddingLeft: index < 10 ? '1.5rem' : 0 }}
         >
           {/* Large Artistic Rank Number for Top 10 */}
           {index < 10 && <RankBadge rank={index + 1} />}
@@ -168,13 +164,13 @@ const Viral = () => {
   );
 
   const renderViralShorts = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-4 md:gap-5 lg:gap-6">
+    <div className="grid grid-cols-2 gap-4">
       {viralShorts.map((short, index) => (
         <div
           key={short.id}
           className="relative group cursor-pointer"
           onClick={() => handleShortClick(short)}
-          style={{ paddingLeft: index < 10 ? (isMobile ? '1.5rem' : '2rem') : 0 }}
+          style={{ paddingLeft: index < 10 ? '1.5rem' : 0 }}
         >
           {/* Large Artistic Rank Number for Top 10 */}
           {index < 10 && <RankBadge rank={index + 1} />}
@@ -214,7 +210,7 @@ const Viral = () => {
   return (
     <div className="min-h-screen pb-20">
       {/* Hero Section with Dynamic Backdrop */}
-      <div className="relative h-[220px] md:h-[320px] overflow-hidden">
+      <div className="relative h-[220px] overflow-hidden">
         {/* Background Image */}
         {heroBackdrop && (
           <div 
@@ -239,17 +235,17 @@ const Viral = () => {
               <Flame className="w-5 h-5 text-primary animate-pulse" />
               <span className="text-sm font-medium text-primary">{t('viral') || 'Viral'}</span>
             </div>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white drop-shadow-lg">
+            <h1 className="text-3xl font-bold text-white drop-shadow-lg">
               Trending & Viral
             </h1>
-            <p className="text-white/80 max-w-md mx-auto text-sm md:text-base">
+            <p className="text-white/80 max-w-md mx-auto text-sm">
               Discover the most popular and viral content everyone is watching
             </p>
           </div>
         </div>
       </div>
       
-      <div className="px-4 md:px-6 lg:px-8 py-6 space-y-6">
+      <div className="px-4 py-6 space-y-6">
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2 mb-6">
@@ -274,7 +270,7 @@ const Viral = () => {
 
         {/* Stats Section */}
         {!isLoading && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
+          <div className="grid grid-cols-2 gap-4 mt-8">
             <div className="p-4 bg-card rounded-xl border border-border">
               <div className="flex items-center gap-2 text-muted-foreground mb-2">
                 <TrendingUp className="w-4 h-4" />

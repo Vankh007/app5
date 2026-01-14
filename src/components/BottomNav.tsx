@@ -1,7 +1,5 @@
 import { Tv, Film, Search } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useIsTablet } from '@/hooks/use-tablet';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useEffect, useState } from 'react';
 import { HomeFilledIcon, ShortsIcon } from '@/components/icons/CustomIcons';
@@ -10,8 +8,6 @@ import { useFullscreenState } from '@/hooks/useFullscreenState';
 
 const BottomNav = () => {
   const location = useLocation();
-  const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
   const { t } = useLanguage();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
@@ -44,7 +40,6 @@ const BottomNav = () => {
   ];
 
   const isShortPage = location.pathname === '/short';
-  const isMobileOrTablet = isMobile || isTablet;
   const isNative = Capacitor.isNativePlatform();
 
   // Hide BottomNav completely during fullscreen video playback
@@ -60,7 +55,7 @@ const BottomNav = () => {
       } ${
         isShortPage 
           ? '' 
-          : isMobileOrTablet || isNative
+          : isNative
             ? 'bg-background/50 backdrop-blur-md border-t border-border/50' 
             : 'bg-background/80 backdrop-blur-lg border-t border-border'
       } ${isNative ? 'native-app-bottom-nav' : ''}`}
