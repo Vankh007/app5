@@ -1,7 +1,6 @@
 import { useRef, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, MessageCircle, Share2, Play, List } from 'lucide-react';
-import { useIsTablet } from '@/hooks/use-tablet';
 
 interface ShortVideoPlayerProps {
   id: string;
@@ -37,7 +36,6 @@ const ShortVideoPlayer = ({
 }: ShortVideoPlayerProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const navigate = useNavigate();
-  const isTablet = useIsTablet();
   const [isPlaying, setIsPlaying] = useState(false);
   const [liked, setLiked] = useState(false);
   const [isMuted, setIsMuted] = useState(false);

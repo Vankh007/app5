@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import MovieCard from './MovieCard';
 import { Skeleton } from './ui/skeleton';
-import { useIsTablet } from '@/hooks/use-tablet';
+
 interface Content {
   id: string;
   title: string;
@@ -19,18 +19,19 @@ interface Content {
   access_type?: 'free' | 'purchase' | 'membership';
   recent_episode?: string;
 }
+
 interface CastMember {
   id: string;
   profile_path: string;
   name?: string;
 }
+
 interface TopMoviesSectionProps {
   className?: string;
 }
 
 const TopMoviesSection = ({ className }: TopMoviesSectionProps = {}) => {
   const navigate = useNavigate();
-  const isTablet = useIsTablet();
   const [content, setContent] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
   const getImageUrl = (item: Content): string | null => {

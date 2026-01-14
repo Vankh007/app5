@@ -3,7 +3,6 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { NotificationsDropdown } from '@/components/NotificationsDropdown';
-import { useIsTablet } from '@/hooks/use-tablet';
 import { Wallet, User } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useWallet } from '@/hooks/useWallet';
@@ -11,9 +10,11 @@ import { KHQRPaymentDialog } from '@/components/payment/KHQRPaymentDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Capacitor } from '@capacitor/core';
+
 interface MobileHeaderProps {
   onMenuClick: () => void;
 }
+
 const MobileHeader = ({
   onMenuClick
 }: MobileHeaderProps) => {
@@ -22,7 +23,6 @@ const MobileHeader = ({
   } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
-  const isTablet = useIsTablet();
   const {
     user
   } = useAuth();
@@ -53,7 +53,7 @@ const MobileHeader = ({
     fetchProfile();
   }, [user]);
   const isShortPage = location.pathname === '/short';
-  const hideHeaderStyles = isShortPage && isTablet;
+  const hideHeaderStyles = isShortPage;
   const isNative = Capacitor.isNativePlatform();
   useEffect(() => {
     const handleScroll = () => {

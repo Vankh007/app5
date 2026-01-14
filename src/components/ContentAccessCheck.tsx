@@ -2,8 +2,6 @@ import { useState, useEffect, ReactNode } from 'react';
 import { Crown, Key } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { Badge } from '@/components/ui/badge';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useIsTablet } from '@/hooks/use-tablet';
 
 interface ContentAccessCheckProps {
   contentId: string;
@@ -34,8 +32,6 @@ const ContentAccessCheck = ({
 }: ContentAccessCheckProps) => {
   const [hasAccess, setHasAccess] = useState(false);
   const [loading, setLoading] = useState(true);
-  const isMobile = useIsMobile();
-  const isTablet = useIsTablet();
 
   // Check user access
   useEffect(() => {
