@@ -8,6 +8,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { useIsTablet } from '@/hooks/use-tablet';
 
 interface MembershipPlan {
   id: string;
@@ -32,6 +34,8 @@ const Subscriptions = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
+  const isTablet = useIsTablet();
 
   useEffect(() => {
     fetchPlans();
@@ -183,28 +187,38 @@ const Subscriptions = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header Section */}
-      <section className="relative bg-gradient-to-b from-primary/10 to-background pt-16 pb-8 px-4">
+      {/* Header Section - Responsive */}
+      <section className={`relative bg-gradient-to-b from-primary/10 to-background ${
+        isMobile ? 'pt-16 pb-8 px-4' : isTablet ? 'pt-20 pb-12 px-6' : 'pt-24 pb-16 px-8'
+      }`}>
         <div className="max-w-7xl mx-auto text-center">
           <Badge 
             variant="outline" 
-            className="mb-4 bg-primary/10 border-primary/30 text-primary text-xs px-2 py-1"
+            className={`mb-4 bg-primary/10 border-primary/30 text-primary ${
+              isMobile ? 'text-xs px-2 py-1' : 'text-sm px-3 py-1'
+            }`}
           >
-            <Crown className="mr-1 h-3 w-3" />
+            <Crown className={`mr-1 ${isMobile ? 'h-3 w-3' : 'h-4 w-4'}`} />
             Premium Membership
           </Badge>
           
-          <h1 className="font-bold text-foreground mb-4 text-2xl">
+          <h1 className={`font-bold text-foreground mb-4 ${
+            isMobile ? 'text-2xl' : isTablet ? 'text-3xl' : 'text-5xl'
+          }`}>
             Choose Your Perfect Plan
           </h1>
           
-          <p className="text-muted-foreground max-w-2xl mx-auto text-sm px-2">
+          <p className={`text-muted-foreground max-w-2xl mx-auto ${
+            isMobile ? 'text-sm px-2' : isTablet ? 'text-base' : 'text-lg'
+          }`}>
             Unlock unlimited access to premium content. Watch anywhere, anytime.
           </p>
 
           {currentMembership && (
-            <div className="mt-6 inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full px-4 py-2 text-xs">
-              <Shield className="text-primary h-4 w-4" />
+            <div className={`mt-6 inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-full ${
+              isMobile ? 'px-4 py-2 text-xs' : 'px-6 py-3 text-sm'
+            }`}>
+              <Shield className={`text-primary ${isMobile ? 'h-4 w-4' : 'h-5 w-5'}`} />
               <span className="text-foreground font-medium">
                 Current Plan: {currentMembership.membership_type}
               </span>
@@ -213,9 +227,17 @@ const Subscriptions = () => {
         </div>
       </section>
 
-      {/* Plans Grid */}
-      <section className="px-4 py-8">
-        <div className="max-w-7xl mx-auto grid gap-6 grid-cols-1">
+      {/* Plans Grid - Responsive */}
+      <section className={isMobile ? 'px-4 py-8' : isTablet ? 'px-6 py-12' : 'px-8 py-16'}>
+        <div className={`max-w-7xl mx-auto grid gap-6 ${
+          isMobile 
+            ? 'grid-cols-1' 
+            : isTablet 
+              ? 'grid-cols-2' 
+              : plans.length === 3 
+                ? 'grid-cols-3' 
+                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        }`}>
           {plans.map((plan, index) => {
             const Icon = getPlanIcon(index);
             const isPopular = index === 1;
@@ -226,9 +248,9 @@ const Subscriptions = () => {
                 key={plan.id}
                 className={`relative overflow-hidden transition-all duration-300 ${
                   isPopular 
-                    ? 'border-primary shadow-lg' 
+                    ? 'border-primary shadow-lg scale-105' 
                     : 'border-border hover:border-primary/50'
-                }`}
+                } ${isMobile ? 'hover:scale-100' : 'hover:scale-105'}`}
               >
                 {isPopular && (
                   <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 text-xs font-semibold rounded-bl-lg">
@@ -243,22 +265,26 @@ const Subscriptions = () => {
                   </div>
                 )}
 
-                <CardHeader className="pb-4">
-                  <div className="inline-flex items-center justify-center rounded-full bg-primary/10 mb-4 w-12 h-12">
-                    <Icon className="text-primary h-6 w-6" />
+                <CardHeader className={isMobile ? 'pb-4' : 'pb-6'}>
+                  <div className={`inline-flex items-center justify-center rounded-full bg-primary/10 mb-4 ${
+                    isMobile ? 'w-12 h-12' : 'w-16 h-16'
+                  }`}>
+                    <Icon className={`text-primary ${isMobile ? 'h-6 w-6' : 'h-8 w-8'}`} />
                   </div>
                   
-                  <CardTitle className="text-xl">
+                  <CardTitle className={isMobile ? 'text-xl' : 'text-2xl'}>
                     {plan.name}
                   </CardTitle>
                   
-                  <CardDescription className="text-xs">
+                  <CardDescription className={isMobile ? 'text-xs' : 'text-sm'}>
                     {plan.duration} {plan.duration_unit} access
                   </CardDescription>
 
-                  <div className="mt-4 space-y-1">
+                  <div className={`mt-4 ${isMobile ? 'space-y-1' : 'space-y-2'}`}>
                     <div className="flex items-baseline">
-                      <span className="font-bold text-foreground text-3xl">
+                      <span className={`font-bold text-foreground ${
+                        isMobile ? 'text-3xl' : 'text-4xl'
+                      }`}>
                         ${plan.price}
                       </span>
                       <span className="text-muted-foreground ml-2 text-sm">
@@ -271,27 +297,39 @@ const Subscriptions = () => {
                   </div>
                 </CardHeader>
 
-                <CardContent className="space-y-3 pb-4">
+                <CardContent className={isMobile ? 'space-y-3 pb-4' : 'space-y-4 pb-6'}>
                   {features.map((feature, idx) => (
                     <div key={idx} className="flex items-center gap-2">
-                      <Check className="text-primary flex-shrink-0 h-4 w-4" />
-                      <span className="text-foreground text-xs">
+                      <Check className={`text-primary flex-shrink-0 ${
+                        isMobile ? 'h-4 w-4' : 'h-5 w-5'
+                      }`} />
+                      <span className={`text-foreground ${
+                        isMobile ? 'text-xs' : 'text-sm'
+                      }`}>
                         {feature}
                       </span>
                     </div>
                   ))}
                   
                   <div className="flex items-center gap-2 pt-2 border-t border-border">
-                    <Check className="text-primary flex-shrink-0 h-4 w-4" />
-                    <span className="text-foreground text-xs">
+                    <Check className={`text-primary flex-shrink-0 ${
+                      isMobile ? 'h-4 w-4' : 'h-5 w-5'
+                    }`} />
+                    <span className={`text-foreground ${
+                      isMobile ? 'text-xs' : 'text-sm'
+                    }`}>
                       Up to {plan.device_limit} devices
                     </span>
                   </div>
 
                   {!plan.show_ads && (
                     <div className="flex items-center gap-2">
-                      <Check className="text-primary flex-shrink-0 h-4 w-4" />
-                      <span className="text-foreground text-xs">
+                      <Check className={`text-primary flex-shrink-0 ${
+                        isMobile ? 'h-4 w-4' : 'h-5 w-5'
+                      }`} />
+                      <span className={`text-foreground ${
+                        isMobile ? 'text-xs' : 'text-sm'
+                      }`}>
                         Ad-free experience
                       </span>
                     </div>
@@ -304,7 +342,7 @@ const Subscriptions = () => {
                       isPopular 
                         ? 'bg-primary hover:bg-primary/90' 
                         : 'bg-secondary hover:bg-secondary/90'
-                    } h-10 text-sm`}
+                    } ${isMobile ? 'h-10 text-sm' : 'h-12 text-base'}`}
                     onClick={() => handleSubscribe(plan.id)}
                     disabled={isCurrentPlan}
                   >
@@ -317,37 +355,41 @@ const Subscriptions = () => {
         </div>
       </section>
 
-      {/* FAQ Section */}
-      <section className="bg-muted/30 px-4 py-8">
+      {/* FAQ Section - Responsive */}
+      <section className={`bg-muted/30 ${
+        isMobile ? 'px-4 py-8' : isTablet ? 'px-6 py-12' : 'px-8 py-16'
+      }`}>
         <div className="max-w-3xl mx-auto">
-          <h2 className="font-bold text-center mb-8 text-xl">
+          <h2 className={`font-bold text-center mb-8 ${
+            isMobile ? 'text-xl' : isTablet ? 'text-2xl' : 'text-3xl'
+          }`}>
             Frequently Asked Questions
           </h2>
           
-          <div className="space-y-4">
-            <div className="bg-card rounded-lg p-4">
-              <h3 className="font-semibold mb-2 text-sm">
+          <div className={isMobile ? 'space-y-4' : 'space-y-6'}>
+            <div className={`bg-card rounded-lg ${isMobile ? 'p-4' : 'p-6'}`}>
+              <h3 className={`font-semibold mb-2 ${isMobile ? 'text-sm' : 'text-base'}`}>
                 Can I cancel anytime?
               </h3>
-              <p className="text-muted-foreground text-xs">
+              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
                 Yes! You can cancel your subscription at any time. You'll continue to have access until the end of your billing period.
               </p>
             </div>
 
-            <div className="bg-card rounded-lg p-4">
-              <h3 className="font-semibold mb-2 text-sm">
+            <div className={`bg-card rounded-lg ${isMobile ? 'p-4' : 'p-6'}`}>
+              <h3 className={`font-semibold mb-2 ${isMobile ? 'text-sm' : 'text-base'}`}>
                 How many devices can I use?
               </h3>
-              <p className="text-muted-foreground text-xs">
+              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
                 Each plan allows streaming on multiple devices simultaneously. Check the device limit for each plan above.
               </p>
             </div>
 
-            <div className="bg-card rounded-lg p-4">
-              <h3 className="font-semibold mb-2 text-sm">
+            <div className={`bg-card rounded-lg ${isMobile ? 'p-4' : 'p-6'}`}>
+              <h3 className={`font-semibold mb-2 ${isMobile ? 'text-sm' : 'text-base'}`}>
                 What payment methods do you accept?
               </h3>
-              <p className="text-muted-foreground text-xs">
+              <p className={`text-muted-foreground ${isMobile ? 'text-xs' : 'text-sm'}`}>
                 We accept all major credit cards, debit cards, and digital payment methods for your convenience.
               </p>
             </div>
@@ -422,14 +464,11 @@ const Subscriptions = () => {
             >
               {selectedPlan !== null ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent" />
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current"></div>
                   Processing...
                 </>
               ) : (
-                <>
-                  <Wallet className="h-4 w-4" />
-                  Pay with Wallet
-                </>
+                `Purchase for $${confirmPlanDetails?.price.toFixed(2) || '0.00'}`
               )}
             </Button>
           </DialogFooter>

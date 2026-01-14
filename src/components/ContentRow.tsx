@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import MovieCard from './MovieCard';
+import { useIsTablet } from '@/hooks/use-tablet';
 
 interface CastMember {
   id: string;
@@ -42,6 +43,7 @@ interface ContentRowProps {
 
 const ContentRow = ({ title, category, contentType, className }: ContentRowProps) => {
   const navigate = useNavigate();
+  const isTablet = useIsTablet();
   const [content, setContent] = useState<Content[]>([]);
   const [loading, setLoading] = useState(true);
 
